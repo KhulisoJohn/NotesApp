@@ -17,7 +17,7 @@ NotesApp/
 │   ├── Program.cs
 │   ├── Models/
 │   ├── Services/
-│   └── ...            
+│   └── ...
 ├── frontend/           # React application
 │   ├── public/
 │   ├── src/
@@ -38,18 +38,17 @@ NotesApp/
 
 ---
 
-
 ---
 
 ## ⚙️ API Endpoints
 
-| Method | Endpoint         | Description         |
-|--------|------------------|---------------------|
-| GET    | `/notes`         | Get all notes       |
-| GET    | `/notes/{id}`    | Get a single note   |
-| POST   | `/notes`         | Create a new note   |
-| PUT    | `/notes/{id}`    | Update a note       |
-| DELETE | `/notes/{id}`    | Delete a note       |
+| Method | Endpoint      | Description       |
+| ------ | ------------- | ----------------- |
+| GET    | `/notes`      | Get all notes     |
+| GET    | `/notes/{id}` | Get a single note |
+| POST   | `/notes`      | Create a new note |
+| PUT    | `/notes/{id}` | Update a note     |
+| DELETE | `/notes/{id}` | Delete a note     |
 
 ---
 
@@ -68,16 +67,22 @@ NotesApp/
 ## 🚀 Getting Started
 
 ### 1️⃣ Start MongoDB
+
 Make sure MongoDB is running locally or in Docker.
+
 ```
 mongod --dbpath ./data
 ```
+
 ### 2️⃣ Run the Backend
+
 ```
 cd backend
 dotnet run
 ```
+
 ### 3️⃣ Run the Frontend
+
 ```
 cd frontend
 
@@ -87,14 +92,19 @@ cd frontend
 npm install
 npm run dev
 ```
+
 ## 🛠 Environment Config
+
 Inside /frontend/.env:
+
 ```
 REACT_APP_API_URL=http://localhost:5000
 ```
+
 You can change this if your backend is running on another port.
 
 ## 🧪 Example Note Schema
+
 ```
 {
   "id": "664fa3b2c85c8722b54321e1",
@@ -103,14 +113,16 @@ You can change this if your backend is running on another port.
   "createdAt": "2025-07-10T10:30:00Z"
 }
 ```
+
 ## 🧑‍💻 Author
+
 Built with ❤️ by Khulyso John
 
 “Code it. Run it. Learn it. Ship it.”
 
 ## 📄 License
-MIT License — use it, modify it, ship it.
 
+MIT License — use it, modify it, ship it.
 
 ---
 
@@ -119,8 +131,3 @@ MIT License — use it, modify it, ship it.
 - Designed for a **single repo with `/backend` and `/frontend` folders**.
 - No cloud deploy needed — you run everything **locally**.
 - Easy to convert to production later with Docker or separate repos.
-
-
-
-
-
