@@ -4,16 +4,15 @@ using BackEnd.DTOs;
 
 namespace BackEnd.Services;
 
-
 public class NoteService : INoteService
 {
     private readonly IMongoCollection<Note> _notes;
 
-    public NoteService(IConfiguration config)
+    public NoteService(IConfiguration config, IMongoClient client)
     {
-        var client = new MongoClient(config["MongoDb:ConnectionString"]);
-        var db = client.GetDatabase(config["MongoDb:DatabaseName"]);
-        _notes = db.GetCollection<Note>("Notes");
+        var dbName = Environment.GetEnvironmentVariable("MONGODB_DATABASE_NAME");
+        var database = client.GetDatabase(dbName);
+        _notes = database.GetCollection<Note>("Notes");
     }
 
     public async Task<List<Note>> GetAllAsync()
@@ -21,8 +20,10 @@ public class NoteService : INoteService
         return await _notes.Find(_ => true).ToListAsync();
     }
 
-    public async Task<Note?> GetByIdAsync(string id) =>
-        await _notes.Find(n => n.Id == id).FirstOrDefaultAsync();
+    public async Task<Note?> GetByIdAsync(string id)
+    {
+        return await _notes.Find(n => n.Id == id).FirstOrDefaultAsync();
+    }
 
     public async Task<Note> CreateAsync(NoteCreateDto dto)
     {

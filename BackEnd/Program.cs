@@ -1,23 +1,23 @@
 using BackEnd.DTOs;
 using BackEnd.Services;
 using BackEnd.Models;
-using System.Linq;
+using DotNetEnv;
 using MongoDB.Driver;
 
+DotNetEnv.Env.Load(); // Loads .env file
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Register services
 builder.Services.AddScoped<INoteService, NoteService>();
 
-// MongoDB config (if not already in appsettings.json)
-builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
+// Register MongoDB Client using .env values
+builder.Services.AddSingleton<IMongoClient>(_ =>
 {
-    var config = serviceProvider.GetRequiredService<IConfiguration>();
-    return new MongoClient(config["MongoDb:ConnectionString"]);
+    var connString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING");
+    return new MongoClient(connString);
 });
 
-// Build the app
 var app = builder.Build();
 
 // Define endpoints
@@ -25,12 +25,8 @@ var app = builder.Build();
 // GET all notes
 app.MapGet("/notes", async (INoteService noteService) =>
 {
-  List<Note> notes = await noteService.GetAllAsync();
-
-
-    return notes.Any()
-        ? Results.Ok(notes)
-        : Results.NoContent();
+    List<Note> notes = await noteService.GetAllAsync();
+    return notes.Any() ? Results.Ok(notes) : Results.NoContent();
 });
 
 // GET single note by ID
@@ -61,5 +57,4 @@ app.MapDelete("/notes/{id}", async (string id, INoteService noteService) =>
     return isDeleted ? Results.Ok() : Results.NotFound();
 });
 
-// Run the app
 app.Run();

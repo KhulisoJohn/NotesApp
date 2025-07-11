@@ -1,4 +1,32 @@
 @BackEnd_HostAddress = https://localhost:5053
 
-### Check if backend is connected to MongoDB
+### 
 GET http://localhost:5053/notes
+
+
+###
+POST http://localhost:5053/notes
+Content-Type: application/json
+
+{
+  "title": "First Note",
+  "content": "This is my first saved note."
+}
+
+###
+GET http://localhost:5053/notes/{id}
+
+
+### 
+PUT http://localhost:5053/notes/{id}
+Content-Type: application/json
+
+{
+  "title": "Updated Note",
+  "content": "The content has been changed.",
+  "status": 1
+}
+
+###
+DELETE http://localhost:5053/notes/{id}
+
