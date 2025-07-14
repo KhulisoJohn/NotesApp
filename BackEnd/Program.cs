@@ -28,6 +28,17 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhostFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // React dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 // Register NoteService with scoped lifetime
 builder.Services.AddScoped<INoteService, NoteService>();
 
@@ -39,6 +50,8 @@ if (string.IsNullOrWhiteSpace(mongoSettings.DatabaseName))
 {
     throw new InvalidOperationException("MongoDB database name is missing.");
 }
+
+app.UseCors("AllowLocalhostFrontend");
 
 // Map endpoints
 
