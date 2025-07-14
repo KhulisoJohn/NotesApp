@@ -6,12 +6,14 @@
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/BackEnd.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/BackEnd.pdb
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/DnsClient.dll
+/home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/DotNetEnv.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Microsoft.AspNetCore.OpenApi.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Microsoft.OpenApi.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/MongoDB.Bson.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/MongoDB.Driver.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/SharpCompress.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Snappier.dll
+/home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Sprache.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Swashbuckle.AspNetCore.Swagger.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -38,5 +40,3 @@
 /home/khulysojohn/Development/NotesApp/BackEnd/obj/Debug/net8.0/BackEnd.pdb
 /home/khulysojohn/Development/NotesApp/BackEnd/obj/Debug/net8.0/BackEnd.genruntimeconfig.cache
 /home/khulysojohn/Development/NotesApp/BackEnd/obj/Debug/net8.0/ref/BackEnd.dll
-/home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/DotNetEnv.dll
-/home/khulysojohn/Development/NotesApp/BackEnd/bin/Debug/net8.0/Sprache.dll

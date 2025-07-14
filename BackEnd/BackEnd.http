@@ -1,4 +1,4 @@
-@BackEnd_HostAddress = https://localhost:5053
+https://localhost:5053
 
 ### 
 GET http://localhost:5053/notes
