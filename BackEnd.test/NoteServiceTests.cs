@@ -1,4 +1,8 @@
-
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Moq;
 using FluentAssertions;
@@ -7,142 +11,158 @@ using BackEnd.Models;
 using BackEnd.DTOs;
 using BackEnd.Services;
 
-
-namespace NotesApp.Tests
+namespace BackEnd.test
 {
     public class NoteServiceTests
     {
-        private readonly Mock<IMongoCollection<Note>> _mockCollection;
+        private readonly Mock<IMongoCollection<Note>> _mockNotesCollection;
         private readonly Mock<IMongoDatabase> _mockDatabase;
         private readonly Mock<IMongoClient> _mockClient;
         private readonly NoteService _service;
 
         public NoteServiceTests()
         {
-            // Setup mocks
-            _mockCollection = new Mock<IMongoCollection<Note>>();
+            _mockNotesCollection = new Mock<IMongoCollection<Note>>();
             _mockDatabase = new Mock<IMongoDatabase>();
             _mockClient = new Mock<IMongoClient>();
 
-            // Setup database to return mocked collection
-            _mockDatabase.Setup(db => db.GetCollection<Note>("Notes", null))
-                .Returns(_mockCollection.Object);
-
             // Setup client to return mocked database
-            _mockClient.Setup(c => c.GetDatabase(It.IsAny<string>(), null))
+            _mockClient
+                .Setup(c => c.GetDatabase(It.IsAny<string>(), null))
                 .Returns(_mockDatabase.Object);
 
-            // Since NoteService expects IConfiguration for connection string,
-            // we mock that with a stub configuration.
-            var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
-            mockConfig.Setup(c => c["MongoDb:ConnectionString"]).Returns("mongodb://localhost:27017");
-            mockConfig.Setup(c => c["MongoDb:DatabaseName"]).Returns("NoteAppDb");
+            // Setup database to return mocked collection
+            _mockDatabase
+                .Setup(db => db.GetCollection<Note>("Notes", null))
+                .Returns(_mockNotesCollection.Object);
 
-            // We override NoteService to inject our mocked client and database:
-            // So, create a derived class for testing that accepts mocks.
-            _service = new TestableNoteService(mockConfig.Object, _mockClient.Object, _mockDatabase.Object, _mockCollection.Object);
+            // Setup service with mocked client and config
+            var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+            mockConfig.Setup(c => c["MongoDb:DatabaseName"]).Returns("TestDb");
+
+            _service = new NoteService(mockConfig.Object, _mockClient.Object);
         }
 
-        // Test class to override constructor for injecting mocks
-        private class TestableNoteService : NoteService
+        private Mock<IAsyncCursor<Note>> CreateMockCursor(IEnumerable<Note> notes)
         {
-            public TestableNoteService(Microsoft.Extensions.Configuration.IConfiguration config,
-                IMongoClient client,
-                IMongoDatabase database,
-                IMongoCollection<Note> collection)
-                : base(config)
-            {
-                _notes = collection;
-            }
+            var mockCursor = new Mock<IAsyncCursor<Note>>();
+            var enumerator = notes.GetEnumerator();
+
+            mockCursor.Setup(_ => _.Current).Returns(() => notes);
+            mockCursor
+                .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
+                .Returns(true)
+                .Returns(false);
+            mockCursor
+                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true)
+                .ReturnsAsync(false);
+            return mockCursor;
         }
 
         [Fact]
         public async Task GetAllAsync_ShouldReturnListOfNotes()
         {
             // Arrange
-            var notesList = new List<Note> { new Note { Id = "1", Title = "Test", Content = "Test Content" } };
-            var mockCursor = new Mock<IAsyncCursor<Note>>();
-            mockCursor.Setup(_ => _.Current).Returns(notesList);
-            mockCursor
-                .SetupSequence(_ => _.MoveNext(It.IsAny<System.Threading.CancellationToken>()))
-                .Returns(true)
-                .Returns(false);
-            mockCursor
-                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<System.Threading.CancellationToken>()))
-                .ReturnsAsync(true)
-                .ReturnsAsync(false);
+            var expectedNotes = new List<Note>
+            {
+                new Note { Id = "1", Title = "Note 1", Content = "Content 1", Status = NoteStatus.Active },
+                new Note { Id = "2", Title = "Note 2", Content = "Content 2", Status = NoteStatus.Active }
+            };
 
-            _mockCollection.Setup(c => c.FindAsync(
-                It.IsAny<FilterDefinition<Note>>(),
-                It.IsAny<FindOptions<Note, Note>>(),
-                default))
+            var mockCursor = CreateMockCursor(expectedNotes);
+
+            _mockNotesCollection
+                .Setup(c => c.FindAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<FindOptions<Note, Note>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(mockCursor.Object);
 
             // Act
-            var result = await _service.GetAllAsync();
+            var notes = await _service.GetAllAsync();
 
             // Assert
-            result.Should().NotBeNull();
-            result.Should().HaveCount(1);
-            result[0].Title.Should().Be("Test");
+            notes.Should().BeEquivalentTo(expectedNotes);
         }
 
         [Fact]
-        public async Task GetByIdAsync_ShouldReturnNote_WhenNoteExists()
+        public async Task GetByIdAsync_ShouldReturnNote_WhenFound()
         {
             // Arrange
-            var note = new Note { Id = "1", Title = "Note1" };
-            var mockCursor = new Mock<IAsyncCursor<Note>>();
-            mockCursor.Setup(_ => _.Current).Returns(new List<Note> { note });
-            mockCursor
-                .SetupSequence(_ => _.MoveNext(It.IsAny<System.Threading.CancellationToken>()))
-                .Returns(true)
-                .Returns(false);
-            mockCursor
-                .SetupSequence(_ => _.MoveNextAsync(It.IsAny<System.Threading.CancellationToken>()))
-                .ReturnsAsync(true)
-                .ReturnsAsync(false);
+            var expectedNote = new Note { Id = "1", Title = "Note 1", Content = "Content 1", Status = NoteStatus.Active };
 
-            _mockCollection.Setup(c => c.FindAsync(
-                It.IsAny<FilterDefinition<Note>>(),
-                It.IsAny<FindOptions<Note, Note>>(),
-                default))
+            var mockCursor = CreateMockCursor(new List<Note> { expectedNote });
+
+            _mockNotesCollection
+                .Setup(c => c.FindAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<FindOptions<Note, Note>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(mockCursor.Object);
 
             // Act
-            var result = await _service.GetByIdAsync("1");
+            var note = await _service.GetByIdAsync("1");
 
             // Assert
-            result.Should().NotBeNull();
-            result!.Id.Should().Be("1");
-            result.Title.Should().Be("Note1");
+            note.Should().NotBeNull();
+            note.Should().BeEquivalentTo(expectedNote);
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldInsertNoteAndReturnNote()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenNotFound()
+        {
+            // Arrange
+            var mockCursor = CreateMockCursor(new List<Note>());
+
+            _mockNotesCollection
+                .Setup(c => c.FindAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<FindOptions<Note, Note>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(mockCursor.Object);
+
+            // Act
+            var note = await _service.GetByIdAsync("nonexistent-id");
+
+            // Assert
+            note.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldInsertNote_AndReturnNote()
         {
             // Arrange
             Note? insertedNote = null;
-            _mockCollection.Setup(c => c.InsertOneAsync(
-                It.IsAny<Note>(),
-                null,
-                default))
-                .Callback<Note, InsertOneOptions?, System.Threading.CancellationToken>((note, options, token) =>
+
+            _mockNotesCollection
+                .Setup(c => c.InsertOneAsync(
+                    It.IsAny<Note>(),
+                    It.IsAny<InsertOneOptions>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<Note, InsertOneOptions?, CancellationToken>((note, _, __) =>
                 {
                     insertedNote = note;
                 })
                 .Returns(Task.CompletedTask);
 
-            var dto = new NoteCreateDto { Title = "New Note", Content = "New Content" };
+            var dto = new NoteCreateDto
+            {
+                Title = "New Note",
+                Content = "Note content"
+            };
 
             // Act
             var result = await _service.CreateAsync(dto);
 
             // Assert
-            result.Should().NotBeNull();
             insertedNote.Should().NotBeNull();
-            insertedNote!.Title.Should().Be("New Note");
-            result.Title.Should().Be("New Note");
+            insertedNote!.Title.Should().Be(dto.Title);
+            insertedNote.Content.Should().Be(dto.Content);
+            insertedNote.Status.Should().Be(NoteStatus.Active);
+            insertedNote.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+
+            result.Should().BeEquivalentTo(insertedNote);
         }
 
         [Fact]
@@ -150,9 +170,11 @@ namespace NotesApp.Tests
         {
             // Arrange
             var deleteResult = new DeleteResult.Acknowledged(1);
-            _mockCollection.Setup(c => c.DeleteOneAsync(
-                It.IsAny<FilterDefinition<Note>>(),
-                default))
+
+            _mockNotesCollection
+                .Setup(c => c.DeleteOneAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(deleteResult);
 
             // Act
@@ -163,24 +185,78 @@ namespace NotesApp.Tests
         }
 
         [Fact]
+        public async Task DeleteAsync_ShouldReturnFalse_WhenNoNoteDeleted()
+        {
+            // Arrange
+            var deleteResult = new DeleteResult.Acknowledged(0);
+
+            _mockNotesCollection
+                .Setup(c => c.DeleteOneAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(deleteResult);
+
+            // Act
+            var result = await _service.DeleteAsync("nonexistent-id");
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task UpdateAsync_ShouldReturnTrue_WhenNoteUpdated()
         {
             // Arrange
             var updateResult = new UpdateResult.Acknowledged(1, 1, null);
-            _mockCollection.Setup(c => c.UpdateOneAsync(
-                It.IsAny<FilterDefinition<Note>>(),
-                It.IsAny<UpdateDefinition<Note>>(),
-                null,
-                default))
+
+            _mockNotesCollection
+                .Setup(c => c.UpdateOneAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<UpdateDefinition<Note>>(),
+                    It.IsAny<UpdateOptions>(),
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(updateResult);
 
-            var dto = new NoteUpdateDto { Title = "Updated", Content = "Updated Content", Status =(NoteStatus) 1 };
+            var dto = new NoteUpdateDto
+            {
+                Title = "Updated Title",
+                Content = "Updated Content",
+                Status = NoteStatus.Active
+            };
 
             // Act
             var result = await _service.UpdateAsync("1", dto);
 
             // Assert
             result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldReturnFalse_WhenNoNoteUpdated()
+        {
+            // Arrange
+            var updateResult = new UpdateResult.Acknowledged(0, 0, null);
+
+            _mockNotesCollection
+                .Setup(c => c.UpdateOneAsync(
+                    It.IsAny<FilterDefinition<Note>>(),
+                    It.IsAny<UpdateDefinition<Note>>(),
+                    It.IsAny<UpdateOptions>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(updateResult);
+
+            var dto = new NoteUpdateDto
+            {
+                Title = "Updated Title",
+                Content = "Updated Content",
+                Status = NoteStatus.Active
+            };
+
+            // Act
+            var result = await _service.UpdateAsync("nonexistent-id", dto);
+
+            // Assert
+            result.Should().BeFalse();
         }
     }
 }

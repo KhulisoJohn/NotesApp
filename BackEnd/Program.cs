@@ -4,14 +4,15 @@ using BackEnd.Models;
 using DotNetEnv;
 using MongoDB.Driver;
 
-DotNetEnv.Env.Load(); // Loads .env file
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register services
+DotNetEnv.Env.Load(); 
+
 builder.Services.AddScoped<INoteService, NoteService>();
 
-// Register MongoDB Client using .env values
+
 builder.Services.AddSingleton<IMongoClient>(_ =>
 {
     var connString = Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING");
@@ -20,7 +21,7 @@ builder.Services.AddSingleton<IMongoClient>(_ =>
 
 var app = builder.Build();
 
-// Define endpoints
+
 
 // GET all notes
 app.MapGet("/notes", async (INoteService noteService) =>
