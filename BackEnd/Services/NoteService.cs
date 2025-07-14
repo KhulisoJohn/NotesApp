@@ -1,18 +1,19 @@
 using MongoDB.Driver;
 using BackEnd.Models;
 using BackEnd.DTOs;
+using Microsoft.Extensions.Options;
 
 namespace BackEnd.Services;
 
 public class NoteService : INoteService
 {
-    private readonly IMongoCollection<Note> _notes;
+   private readonly IMongoCollection<Note> _notes;
 
-    public NoteService(IConfiguration config, IMongoClient client)
+    public NoteService(IOptions<MongoDbSetting> settings, IMongoClient client)
     {
-        var dbName = Environment.GetEnvironmentVariable("MONGODB_DATABASE_NAME");
+        var dbName = settings.Value.DatabaseName;
         var database = client.GetDatabase(dbName);
-        _notes = database.GetCollection<Note>("Notes");
+        _notes = database.GetCollection<Note>("notes");
     }
 
     public async Task<List<Note>> GetAllAsync()
