@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ✅ added useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import type { Note } from "../types/Note";
+import '../App.css';
 import { getAllNotes, deleteNote } from "../api/notes";
 import { NoteCard } from "../components/NoteCard";
 
 export const Home = () => {
   const [notes, setNotes] = useState<Note[]>([]);
-  const navigate = useNavigate(); // ✅ hook for programmatic navigation
+  const navigate = useNavigate();
 
   const loadNotes = async () => {
     const data = await getAllNotes();
@@ -23,16 +24,26 @@ export const Home = () => {
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/edit/${id}`); // ✅ navigate to the edit page with note id
+    navigate(`/edit/${id}`);
   };
 
   return (
-    <div>
-      <h2>Notes</h2>
-      <Link to="/add">
-        <button style={{ marginBottom: "1rem" }}>➕ Add New Note</button>
-      </Link>
-      {notes.map((note) => (
+    <div className="hero">
+      <div className="nav">
+        <h2>NotesApp</h2>
+        <Link to="/add">
+          <button style={{ marginBottom: "1rem" }}>➕ Add New Note</button>
+        </Link>
+      </div>
+
+      <div>
+        <h3>My Notes</h3>
+       <p style={{ marginBottom: "1.5rem", fontSize: "1.1rem" }}>
+        Welcome to <strong>NotesApp</strong> — your space to jot down thoughts, plans, reminders, or anything on your mind. All your notes are organized, editable, and safely stored for whenever you need them. Get started by creating a new note or managing your existing ones below.
+      </p>
+
+    
+        {notes.map((note) => (
         <NoteCard
           key={note.id}
           note={note}
@@ -40,6 +51,9 @@ export const Home = () => {
           onEdit={handleEdit}
         />
       ))}
+      </div>
+    
+    
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import '../App.css';
 import { useParams, useNavigate } from "react-router-dom";
 import type { NoteUpdateDto, Note } from "../types/Note";
 import { getNoteById, updateNote } from "../api/notes";

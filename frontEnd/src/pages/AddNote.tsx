@@ -1,5 +1,6 @@
 // src/pages/AddNote.tsx
 import { useNavigate } from 'react-router-dom';
+import '../App.css';
 import {NoteForm} from '../components/NoteForm';
 import { CreateNote } from '../api/notes';
 import type { NoteCreateDto } from '../types/Note';

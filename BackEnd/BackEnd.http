@@ -14,16 +14,16 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:5053/notes/{id}
+GET http://localhost:5053/notes/6876f2733900911b12778931
 
 
 ### 
-PUT http://localhost:5053/notes/{id}
+PUT http://localhost:5053/notes/6876f2733900911b12778931
 Content-Type: application/json
 
 {
   "title": "Updated Note",
-  "content": "The content has been changed.",
+  "content": "The content has been one more time.",
   "status": 1
 }
 

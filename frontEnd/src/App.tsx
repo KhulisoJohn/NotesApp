@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home";
+import './App.css';
 import AddNote from "./pages/AddNote";
 import { EditNote } from "./pages/EditNote";
 

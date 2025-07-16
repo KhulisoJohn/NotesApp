@@ -5,20 +5,15 @@ using DotNetEnv;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-// Load environment variables from .env file
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
-
-// Bind MongoDB settings from configuration (appsettings.json or environment variables)
+// MongoDB configuration
 builder.Services.Configure<MongoDbSetting>(
     builder.Configuration.GetSection("MongoDbSetting")
 );
 
-// Register MongoClient as singleton using connection string from config
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MongoDbSetting>>().Value;
@@ -28,32 +23,33 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
+// CORS for frontend (React dev server)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhostFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // React dev server
+        policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-
-// Register NoteService with scoped lifetime
+// Register services
 builder.Services.AddScoped<INoteService, NoteService>();
 
 var app = builder.Build();
 
-// Simple validation to check if DatabaseName is configured
+// Validate DB config
 var mongoSettings = app.Services.GetRequiredService<IOptions<MongoDbSetting>>().Value;
 if (string.IsNullOrWhiteSpace(mongoSettings.DatabaseName))
-{
     throw new InvalidOperationException("MongoDB database name is missing.");
-}
 
 app.UseCors("AllowLocalhostFrontend");
 
-// Map endpoints
+
+// ==========================
+//        API ROUTES
+// ==========================
 
 // GET all notes
 app.MapGet("/notes", async (INoteService noteService) =>
