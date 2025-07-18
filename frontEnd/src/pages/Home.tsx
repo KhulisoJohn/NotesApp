@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { Note } from "../types/Note";
 import '../App.css';
+import { MdAdd } from "react-icons/md";
 import { getAllNotes, deleteNote } from "../api/notes";
 import { NoteCard } from "../components/NoteCard";
 
@@ -32,17 +33,22 @@ export const Home = () => {
       <div className="nav">
         <h2>NotesApp</h2>
         <Link to="/add">
-          <button style={{ marginBottom: "1rem" }}>➕ Add New Note</button>
+          <button style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <MdAdd size={20} />
+            Add New Note
+          </button>
         </Link>
       </div>
+      <hr />
 
-      <div>
+      <div className="hero-content">
         <h3>My Notes</h3>
-       <p style={{ marginBottom: "1.5rem", fontSize: "1.1rem" }}>
-        Welcome to <strong>NotesApp</strong> — your space to jot down thoughts, plans, reminders, or anything on your mind. All your notes are organized, editable, and safely stored for whenever you need them. Get started by creating a new note or managing your existing ones below.
+       <p>
+        Welcome to <strong>NotesApp</strong> — your space to jot down thoughts, plans, reminders, or anything on your mind. 
+        All your notes are organized, editable, and safely stored for whenever you need them. Get started by creating 
+        a new note or managing your existing ones below.
       </p>
 
-    
         {notes.map((note) => (
         <NoteCard
           key={note.id}
@@ -51,6 +57,8 @@ export const Home = () => {
           onEdit={handleEdit}
         />
       ))}
+    
+        
       </div>
     
     
