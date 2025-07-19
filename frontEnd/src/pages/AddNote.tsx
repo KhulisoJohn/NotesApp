@@ -1,28 +1,47 @@
-// src/pages/AddNote.tsx
-import { useNavigate } from 'react-router-dom';
-import '../App.css';
-import {NoteForm} from '../components/NoteForm';
-import { CreateNote } from '../api/notes';
-import type { NoteCreateDto } from '../types/Note';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import NoteForm from '../components/NoteForm'; // Use the form
+import type { NoteCreateDto } from '../types/Note'; // Optional
 
-const AddNote = () => {
-  const navigate = useNavigate();
+const AddNote: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleAddNote = async (data: NoteCreateDto) => {
+  const handleSubmit = async (note: NoteCreateDto) => {
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
     try {
-      await CreateNote(data);
-      navigate('/'); // Go back home after success
-    } catch (error) {
-      console.error("Failed to create note:", error);
+      await axios.post('http://localhost:5053/notes', note); 
+      setSuccessMessage('Note created successfully!');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to create note');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container">
-      <h2>Add a New Note</h2>
-      <NoteForm<NoteCreateDto> onSubmit={handleAddNote} />
+    <>
+      <div className="nav">
+        <h2>NotesApp</h2>
+        <Link to="/">
+          <button>Back</button>
+        </Link>
+      </div>
 
-    </div>
+      <div className="add-note">
+        <h2>Add New Note</h2>
+        <NoteForm onSubmit={handleSubmit} />
+        {loading && <p>Submitting...</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      </div>
+    </>
   );
 };
 

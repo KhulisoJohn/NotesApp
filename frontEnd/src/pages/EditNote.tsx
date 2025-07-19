@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import '../App.css';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import type { NoteUpdateDto, Note } from "../types/Note";
 import { getNoteById, updateNote } from "../api/notes";
-import { NoteForm } from "../components/NoteForm";
+import  NoteForm  from "../components/NoteForm";
 
 export const EditNote = () => {
   const { id } = useParams();
@@ -29,17 +29,21 @@ export const EditNote = () => {
   if (!note) return <div>Loading...</div>;
 
   return (
+    <>
+    <div className="nav">
+      <h2>NotesApp</h2>
+      <Link to="/">
+        <button>Back</button>
+      </Link>
+    </div>
+
     <div>
       <h2>Edit Note</h2>
-      <NoteForm<NoteUpdateDto>
-  onSubmit={handleUpdate}
-  initialValue={{
-    title: note.title,
-    content: note.content,
-    status: note.status,
-  }}
-/>
-
+      <NoteForm
+        onSubmit={handleUpdate}
+        initialValue={{ title: note.title, content: note.content, status: note.status }}
+      />
     </div>
+    </>
   );
 };

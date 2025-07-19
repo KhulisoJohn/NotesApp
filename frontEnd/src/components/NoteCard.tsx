@@ -13,9 +13,16 @@ export const NoteCard = ({ note, onDelete, onEdit }: NoteCardProps) => {
     <div className="note-card">
       
         <h3 style={{ marginBottom: "0.5rem" }}>Title: {note.title}</h3>
-        <p>{note.content}</p>
-        
+      <p className="note-content" style={{ 
+  wordWrap: 'break-word', 
+  overflowWrap: 'break-word', 
+  whiteSpace: 'pre-wrap' 
+}}>
+  {note.content}
+</p>
 
+        
+  <div className="note-bottom">
       <div style={{ marginBottom: "1rem" }}>
         <p>Status: {note.status}</p>
         <p>
@@ -29,11 +36,12 @@ export const NoteCard = ({ note, onDelete, onEdit }: NoteCardProps) => {
 
       <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
         <button onClick={() => onEdit(note.id)}>
-          <FaEdit /> Edit
+          <FaEdit />
         </button>
         <button onClick={() => onDelete(note.id)}>
-          <FaTrash /> Delete
+          <FaTrash /> 
         </button>
+      </div>
       </div>
     </div>
   );
