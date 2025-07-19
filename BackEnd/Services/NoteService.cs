@@ -8,12 +8,18 @@ namespace BackEnd.Services
     public class NoteService : INoteService
     {
         private readonly IMongoCollection<Note> _notes;
+        private IMongoClient @object;
 
         public NoteService(IOptions<MongoDbSetting> settings, IMongoClient client)
         {
             var dbName = settings.Value.DatabaseName;
             var database = client.GetDatabase(dbName);
             _notes = database.GetCollection<Note>("notes");
+        }
+
+        public NoteService(IMongoClient @object)
+        {
+            this.@object = @object;
         }
 
         public async Task<List<Note>> GetAllAsync()
@@ -62,5 +68,14 @@ namespace BackEnd.Services
             return result.ModifiedCount > 0;
         }
 
+        public async Task UpdateAsync(string noteId, Note updatedNote)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task CreateAsync(Note newNote)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,60 +1,77 @@
-import { useState } from "react";
-import type { NoteCreateDto, NoteUpdateDto, NoteStatus } from "../types/Note";
+import React, { useState, useEffect } from 'react';
+import '../App.css';
 
-type Props<T> = {
-  onSubmit: (dto: T) => void;
-  initialValue?: Partial<T>;
-};
 
-export function NoteForm<T extends NoteCreateDto | NoteUpdateDto>({
-  onSubmit,
-  initialValue = {},
-}: Props<T>) {
-  const [title, setTitle] = useState(initialValue.title || "");
-  const [content, setContent] = useState(initialValue.content || "");
-  const [status, setStatus] = useState<NoteStatus>(
-    (initialValue as NoteUpdateDto).status || "Active"
-  );
+type NoteStatus = 'Active' | 'Archived';
+
+interface NoteFormProps {
+  onSubmit: (note: { title: string; content: string; status: NoteStatus }) => void;
+  initialValue?: {
+    title: string;
+    content: string;
+    status: NoteStatus;
+  };
+}
+
+const NoteForm: React.FC<NoteFormProps> = ({ onSubmit, initialValue }) => {
+  const [title, setTitle] = useState(initialValue?.title || '');
+  const [content, setContent] = useState(initialValue?.content || '');
+  const [status, setStatus] = useState<NoteStatus>(initialValue?.status || 'Active');
+
+  useEffect(() => {
+    if (initialValue) {
+      setTitle(initialValue.title);
+      setContent(initialValue.content);
+      setStatus(initialValue.status);
+    }
+  }, [initialValue]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const base = { title, content };
-    if ("status" in initialValue) {
-      onSubmit({ ...base, status } as T); // for update
-    } else {
-      onSubmit(base as T); // for create
+    if (!title || !content) return;
+
+    onSubmit({ title, content, status });
+
+    
+    if (!initialValue) {
+      setTitle('');
+      setContent('');
+      setStatus('Active');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="note-form" onSubmit={handleSubmit}>
+      <label htmlFor="title">Title</label>
       <input
-        placeholder="Title"
+        id="title"
+        type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        required
       />
-      <br />
+
+      <label htmlFor="content">Content</label>
       <textarea
-        placeholder="Content"
+        id="content"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        required
-      />
-      <br />
+      ></textarea>
 
-      {"status" in initialValue && (
-        <>
-          <label>Status:</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value as NoteStatus)}>
-            <option value="Active">Active</option>
-            <option value="Archived">Archived</option>
-          </select>
-          <br />
-        </>
-      )}
+      <label htmlFor="status">Status</label>
+      <select
+        id="status"
+        value={status}
+        onChange={(e) => setStatus(e.target.value as NoteStatus)}
+      >
+        <option value="Active">Active</option>
+        <option value="Archived">Archived</option>
+      </select>
 
-      <button type="submit">💾 Save</button>
+      <button type="submit" className="submit-btn">
+        {initialValue ? 'Update Note' : 'Add Note'}
+      </button>
     </form>
   );
-}
+};
+
+export default NoteForm;
